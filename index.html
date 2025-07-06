@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book CRUD Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .form-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .books-section {
+            margin-top: 30px;
+        }
+
+        .books-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .books-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .books-table th,
+        .books-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .books-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .books-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .books-table {
+                font-size: 14px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Book CRUD Dashboard</h1>
+            <p>Manage your book collection with ease</p>
+        </div>
+
+        <div class="content">
+            <!-- Alert Messages -->
+            <div id="alert" class="alert hidden"></div>
+
+            <!-- Add/Edit Book Form -->
+            <div class="form-section">
+                <h2 id="formTitle">Add New Book</h2>
+                <form id="bookForm">
+                    <input type="hidden" id="bookId" value="">
+                    <div class="form-group">
+                        <label for="title">Title *</label>
+                        <input type="text" id="title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="author">Author</label>
+                        <input type="text" id="author" name="author">
+                    </div>
+                    <div class="form-group">
+                        <label for="publishedYear">Published Year</label>
+                        <input type="number" id="publishedYear" name="publishedYear" min="1800" max="2024">
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Add Book</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn" onclick="resetForm()">Cancel</button>
+                </form>
+            </div>
+
+            <!-- Books List -->
+            <div class="books-section">
+                <h2>📖 Book Collection</h2>
+                <button class="btn btn-success" onclick="loadBooks()">🔄 Refresh Books</button>
+                <div id="loading" class="loading hidden">Loading books...</div>
+                <table class="books-table" id="booksTable">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Published Year</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booksTableBody">
+                        <!-- Books will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api/books';
+        let books = [];
+
+        // Load books on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBooks();
+        });
+
+        // Form submission
+        document.getElementById('bookForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const bookId = document.getElementById('bookId').value;
+            
+            if (bookId) {
+                updateBook(bookId);
+            } else {
+                createBook();
+            }
+        });
+
+        // Create a new book
+        async function createBook() {
+            const formData = getFormData();
+            
+            try {
+                const response = await fetch(API_BASE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    showAlert('Book created successfully!', 'success');
+                    resetForm();
+                    loadBooks();
+                } else {
+                    const error = await response.json();
+                    showAlert(`Error: ${error.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Load all books
+        async function loadBooks() {
+            showLoading(true);
+            
+            try {
+                const response = await fetch(API_BASE_URL);
+                if (response.ok) {
+                    books = await response.json();
+                    displayBooks();
+                } else {
+                    showAlert('Error loading books', 'error');
+                }
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Display books in table
+        function displayBooks() {
+            const tbody = document.getElementById('booksTableBody');
+            tbody.innerHTML = '';
+
+            if (books.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666;">No books found. Add your first book!</td></tr>';
+                return;
+            }
+
+            books.forEach(book => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${book.title}</td>
+                    <td>${book.author || 'N/A'}</td>
+                    <td>${book.publishedYear || 'N/A'}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-warning" onclick="editBook('${book._id}')">✏️ Edit</button>
+                            <button class="btn btn-danger" onclick="deleteBook('${book._id}')">🗑️ Delete</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Edit a book
+        function editBook(bookId) {
+            const book = books.find(b => b._id === bookId);
+            if (book) {
+                document.getElementById('bookId').value = book._id;
+                document.getElementById('title').value = book.title;
+                document.getElementById('author').value = book.author || '';
+                document.getElementById('publishedYear').value = book.publishedYear || '';
+                
+                document.getElementById('formTitle').textContent = 'Edit Book';
+                document.getElementById('submitBtn').textContent = 'Update Book';
+                
+                // Scroll to form
+                document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Update a book
+        async function updateBook(bookId) {
+            const formData = getFormData();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/${bookId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    showAlert('Book updated successfully!', 'success');
+                    resetForm();
+                    loadBooks();
+                } else {
+                    const error = await response.json();
+                    showAlert(`Error: ${error.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Delete a book
+        async function deleteBook(bookId) {
+            if (!confirm('Are you sure you want to delete this book?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/${bookId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('Book deleted successfully!', 'success');
+                    loadBooks();
+                } else {
+                    const error = await response.json();
+                    showAlert(`Error: ${error.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Get form data
+        function getFormData() {
+            return {
+                title: document.getElementById('title').value,
+                author: document.getElementById('author').value,
+                publishedYear: document.getElementById('publishedYear').value ? parseInt(document.getElementById('publishedYear').value) : null
+            };
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('bookForm').reset();
+            document.getElementById('bookId').value = '';
+            document.getElementById('formTitle').textContent = 'Add New Book';
+            document.getElementById('submitBtn').textContent = 'Add Book';
+        }
+
+        // Show alert message
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.classList.remove('hidden');
+            
+            setTimeout(() => {
+                alert.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Show/hide loading
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const table = document.getElementById('booksTable');
+            
+            if (show) {
+                loading.classList.remove('hidden');
+                table.classList.add('hidden');
+            } else {
+                loading.classList.add('hidden');
+                table.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html> 
